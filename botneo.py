@@ -2,10 +2,9 @@ import telebot
 from telebot.types import Message
 import cerebelo as celebro
 import random as rd
-import numpy as np
 import time
 
-bot = telebot.TeleBot('5842578280:AAHDluEsOqq0VKw2GZRomVfzQIdYAOgIUxM')
+bot = telebot.TeleBot('TelegramBot_Key')
 on = False
 quem = 'neo2'
 
@@ -31,18 +30,29 @@ def send_message(message):
     
     elif command in ['/mimir'] and c.get_status(message.chat.id):
         c.update_status((message.chat.id,0))
-        bot.send_message(message.chat.id, 'Vou me suicidar')
+        bot.send_message(message.chat.id, f'O {message.from_user.first_name} {message.from_user.last_name} me suicidou.')
    
     on = c.get_status(message.chat.id)
     
     if on:
         if command == '/quem':
-            quem = c.query_msg(message.reply_to_message.text)
-            bot.send_chat_action(message.chat.id, 'typing')
-            time.sleep(1)            
-            bot.send_message(message.chat.id, quem[0])
-            print(message.reply_to_message.text)
-        
+            if message.reply_to_message.from_user.first_name == 'neo2':
+                quem = c.query_command_quem(message.reply_to_message.text)
+                for name in quem:
+                    text = ', '.join(quem)
+                bot.send_chat_action(message.chat.id, 'typing')
+                time.sleep(1)            
+                bot.reply_to(message.reply_to_message, text) #type: ignore
+            elif (message.reply_to_message.from_user.first_name and message.reply_to_message.from_user.last_name) != 'None':
+                time.sleep(1)
+                bot.reply_to(message, f'Essa mensagem foi dita por {message.reply_to_message.from_user.first_name} {message.reply_to_message.from_user.last_name}, seu burro')
+            elif message.reply_to_message.chat.first_name != "None":
+                time.sleep(1)
+                bot.reply_to(message, f'Essa mensagem foi dita por {message.reply_to_message.from_user.first_name}, seu burro')
+            else:
+                time.sleep(1)
+                bot.reply_to(message, f'Essa mensagem foi dita por {message.reply_to_message.from_user.username}, seu burro')
+                
         elif command == '/id':
             c=celebro.Cerebelo('frases.db')
             rowzap=c.query_rowid(message.text.split()[1])
@@ -63,7 +73,6 @@ def send_message(message):
 def send_reply(message: Message):
     global on; p = 0.6; global quem
     c=celebro.Cerebelo('frases.db')
-    
     if c.get_status(message.chat.id):
         if p <= rd.uniform(0,1) and not ('neo' in str(message.text)):
             chatzap=c.query_rowid(rd.randint(1,30145))
@@ -78,6 +87,11 @@ def send_reply(message: Message):
             bot.send_chat_action(message.chat.id, 'typing')
             time.sleep(len(chatzap[1])*0.03)
             bot.reply_to(message, chatzap[1])
+        
+        elif ('O Leo j' in str(message.text)):
+            bot.send_chat_action(message.chat.id, 'typing')
+            time.sleep(0.2)
+            bot.reply_to(message, 'Orgulho do meu menino.')
         
         c.close_conn()
             

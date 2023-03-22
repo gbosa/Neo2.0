@@ -83,7 +83,7 @@ class Cerebelo:
 
     def query_msg(self, msg):
         try:
-            sql_query = f'SELECT *, rowid FROM message WHERE message="{msg}"'
+            sql_query = f'SELECT *, rowid FROM message WHERE message like "%{msg}%"'
             cursor = self.conn.cursor() # type: ignore 
             cursor.execute(sql_query)
             row=cursor.fetchone()
@@ -97,22 +97,21 @@ class Cerebelo:
         cursor.execute(sql)
         return print('SQL command executed.')
     
-    def query_like(self, msg):
-        
-        sql_query = f'SELECT *, rowid FROM message WHERE message like "%{msg}%"'
+    def query_command_quem(self, msg):
+        sql_query = f'SELECT name FROM message WHERE message like "%{msg}%"'
         cursor = self.conn.cursor() # type: ignore 
         cursor.execute(sql_query)
         row=cursor.fetchall()
-        cursor.close()
+        cursor.close()       
         
-        return row
+        return set([a[0] for a in row])
 
     def close_conn(self):
         self.conn.close()
         return print(f'Connection to {self.db} closed.')
 
 if __name__ == '__main__':
-    Brain=Cerebelo('database_name.db')
+    Brain=Cerebelo('frases.db')
     c=Brain.conn
     sql_create_status = """ CREATE TABLE IF NOT EXISTS chat_status (
                                         chat_id INT PRIMARY KEY,
@@ -127,3 +126,4 @@ if __name__ == '__main__':
     Brain.execute_sql(sql_create_message)  # type: ignore
     Brain.execute_sql(sql_create_status)
     Brain.close_conn()  # type: ignore
+    
